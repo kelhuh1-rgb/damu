@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактирование профиля - HR Аналитика{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h4 class="fw-bold mb-0">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i>
+                        Редактирование профиля
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Имя</label>
+                                {{ user_form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Фамилия</label>
+                                {{ user_form.last_name }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Имя пользователя</label>
+                            {{ user_form.username }}
+                            <div class="form-text">Имя пользователя нельзя изменить</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            {{ user_form.email }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Должность</label>
+                            {{ profile_form.position }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Телефон</label>
+                            {{ profile_form.phone }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Дата рождения</label>
+                            {{ profile_form.birth_date }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Аватар</label>
+                            {{ profile_form.avatar }}
+                            {% if user.employee_profile.avatar %}
+                                <div class="mt-2">
+                                    <img src="{{ user.employee_profile.avatar.url }}" alt="Current avatar" style="max-width: 100px; border-radius: 10px;">
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">О себе</label>
+                            {{ profile_form.bio }}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-custom">
+                                <i class="bi bi-check-lg me-2"></i> Сохранить изменения
+                            </button>
+                            <a href="{% url 'profile' %}" class="btn btn-outline-secondary btn-custom">
+                                <i class="bi bi-x-lg me-2"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

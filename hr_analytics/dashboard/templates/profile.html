@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Мой профиль - HR Аналитика{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Левая колонка - информация о пользователе -->
+        <div class="col-lg-4 mb-4">
+            <div class="card text-center p-4">
+                <div class="position-relative mb-3">
+                    {% if employee.avatar %}
+                        <img src="{{ employee.avatar.url }}" alt="Avatar" class="profile-avatar">
+                    {% else %}
+                        <div class="bg-gradient-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center profile-avatar">
+                            <i class="bi bi-person" style="font-size: 4rem;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="position-absolute bottom-0 end-0 translate-middle">
+                        <span class="badge bg-success badge-pill"><i class="bi bi-check-circle-fill"></i> Активен</span>
+                    </div>
+                </div>
+
+                <h4 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h4>
+                <p class="text-muted mb-3">{{ employee.position|default:"Должность не указана" }}</p>
+
+                {% if employee.department %}
+                    <span class="badge bg-primary badge-pill mb-3">{{ employee.department.name }}</span>
+                {% endif %}
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-custom">
+                        <i class="bi bi-pencil me-2"></i> Редактировать профиль
+                    </a>
+                    <a href="{% url 'change_password' %}" class="btn btn-outline-secondary btn-custom">
+                        <i class="bi bi-key me-2"></i> Сменить пароль
+                    </a>
+                </div>
+            </div>
+
+            <!-- Контактная информация -->
+            <div class="card mt-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Контакты</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3 d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="bi bi-envelope text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Email</small>
+                                <span class="fw-semibold">{{ user.email|default:"Не указан" }}</span>
+                            </div>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="bi bi-telephone text-success"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Телефон</small>
+                                <span class="fw-semibold">{{ employee.phone|default:"Не указан" }}</span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="bi bi-calendar text-info"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Дата рождения</small>
+                                <span class="fw-semibold">{{ employee.birth_date|date:"d.m.Y"|default:"Не указана" }}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка - детали и статистика -->
+        <div class="col-lg-8">
+            <!-- О себе -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-file-person me-2 text-primary"></i>О себе</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">
+                        {{ employee.bio|default:"Информация о себе не заполнена. Нажмите 'Редактировать профиль', чтобы добавить описание."|linebreaks }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- HR-метрики сотрудника -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-graph-up me-2 text-success"></i>Мои HR-метрики</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <h3 class="text-primary fw-bold">{{ employee.performance_score|default:"0" }}%</h3>
+                                <small class="text-muted">Продуктивность</small>
+                                <div class="progress progress-custom mt-2">
+                                    <div class="progress-bar progress-bar-custom bg-primary" style="width: {{ employee.performance_score|default:"0" }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <h3 class="text-success fw-bold">{{ employee.engagement_score|default:"0" }}%</h3>
+                                <small class="text-muted">Вовлечённость</small>
+                                <div class="progress progress-custom mt-2">
+                                    <div class="progress-bar progress-bar-custom bg-success" style="width: {{ employee.engagement_score|default:"0" }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <h3 class="text-info fw-bold">{{ employee.hire_date|date:"d.m.Y" }}</h3>
+                                <small class="text-muted">Дата приёма</small>
+                                <div class="mt-2">
+                                    <span class="badge bg-info badge-pill">Стаж: {{ employee.hire_date|timesince }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Системная информация -->
+            <div class="card">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-shield-check me-2 text-warning"></i>Системная информация</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Имя пользователя:</small>
+                            <p class="fw-semibold mb-0">{{ user.username }}</p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Дата регистрации:</small>
+                            <p class="fw-semibold mb-0">{{ user.date_joined|date:"d.m.Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Последний вход:</small>
+                            <p class="fw-semibold mb-0">{{ user.last_login|date:"d.m.Y H:i"|default:"Нет данных" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Статус:</small>
+                            <p class="fw-semibold mb-0">
+                                {% if user.is_superuser %}
+                                    <span class="badge bg-danger badge-pill">Администратор</span>
+                                {% elif user.is_staff %}
+                                    <span class="badge bg-warning badge-pill">Менеджер</span>
+                                {% else %}
+                                    <span class="badge bg-success badge-pill">Сотрудник</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

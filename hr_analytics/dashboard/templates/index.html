@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+
+{% block title %}Главный дашборд - HR Аналитика{% endblock %}
+
+{% block content %}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="container py-4">
+    <!-- KPI Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-gradient-primary me-3">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Всего сотрудников</h6>
+                        <h3 class="mb-0 fw-bold">{{ total_employees }}</h3>
+                        <small class="text-success"><i class="bi bi-arrow-up"></i> +12% к прошлому месяцу</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card h-100" style="border-left-color: var(--success-color);">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-gradient-success me-3">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Средняя продуктивность</h6>
+                        <h3 class="mb-0 fw-bold">{{ avg_performance }}%</h3>
+                        <small class="text-success"><i class="bi bi-arrow-up"></i> +3.2%</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card h-100" style="border-left-color: var(--warning-color);">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-gradient-warning me-3">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Вовлечённость</h6>
+                        <h3 class="mb-0 fw-bold">{{ avg_engagement }}%</h3>
+                        <small class="text-warning"><i class="bi bi-dash"></i> без изменений</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card h-100" style="border-left-color: var(--danger-color);">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-gradient-danger me-3">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Текучесть кадров</h6>
+                        <h3 class="mb-0 fw-bold">{{ turnover_rate }}%</h3>
+                        <small class="text-danger"><i class="bi bi-arrow-up"></i> +0.8% ⚠️</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-bar-chart-fill text-primary me-2"></i>
+                        Распределение по отделам
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="deptChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-pie-chart-fill text-success me-2"></i>
+                        Структура компании
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Chart -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-graph-up text-info me-2"></i>
+                        Продуктивность по отделам
+                    </h5>
+                    <span class="badge bg-info badge-pill">Рекомендация: Обратить внимание на IT-отдел</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Departments Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card table-container">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-building text-primary me-2"></i>
+                        Детализация по отделам
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Отдел</th>
+                                    <th>Сотрудников</th>
+                                    <th>Продуктивность</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dept in departments %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-gradient-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-building"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-bold">{{ dept.name }}</h6>
+                                                <small class="text-muted">Руководитель: {{ dept.manager }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary badge-pill">{{ dept.count }} чел.</span>
+                                    </td>
+                                    <td style="width: 30%;">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress progress-custom flex-grow-1 me-3">
+                                                <div class="progress-bar progress-bar-custom {% if dept.avg_performance >= 80 %}bg-success{% elif dept.avg_performance >= 60 %}bg-warning{% else %}bg-danger{% endif %}"
+                                                     style="width: {{ dept.avg_performance }}%"></div>
+                                            </div>
+                                            <span class="fw-bold">{{ dept.avg_performance }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if dept.avg_performance >= 80 %}
+                                            <span class="badge bg-success badge-pill"><i class="bi bi-check-circle me-1"></i> Отлично</span>
+                                        {% elif dept.avg_performance >= 60 %}
+                                            <span class="badge bg-warning badge-pill"><i class="bi bi-exclamation-circle me-1"></i> Норма</span>
+                                        {% else %}
+                                            <span class="badge bg-danger badge-pill"><i class="bi bi-x-circle me-1"></i> Требует внимания</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary btn-custom">
+                                            <i class="bi bi-eye me-1"></i> Детали
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start">
+                        <div class="me-4">
+                            <i class="bi bi-robot" style="font-size: 3rem;"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-3">AI-рекомендации для руководства</h4>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                        <h6 class="fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Высокая текучесть в IT</h6>
+                                        <p class="mb-0 small">Предлагаем провести встречи 1-на-1 с ключевыми разработчиками и пересмотреть условия работы.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                        <h6 class="fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>Повышение вовлечённости</h6>
+                                        <p class="mb-0 small">В отделе продаж наблюдается рост продуктивности. Рекомендуем распространить лучшие практики.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                        <h6 class="fw-bold"><i class="bi bi-calendar-check me-2"></i>Планирование найма</h6>
+                                        <p class="mb-0 small">Прогноз: через 2 месяца потребуется расширение команды поддержки на 15%.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Получаем данные из Django
+    const chartData = JSON.parse('{{ chart_data|safe }}');
+
+    // График распределения по отделам
+    const deptCtx = document.getElementById('deptChart').getContext('2d');
+    new Chart(deptCtx, {
+        type: 'bar',
+        data: {
+            labels: chartData.departments,
+            datasets: [{
+                label: 'Количество сотрудников',
+                data: chartData.employee_counts,
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderColor: 'rgba(99, 102, 241, 1)',
+                borderWidth: 2,
+                borderRadius: 10,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Круговая диаграмма
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: chartData.departments,
+            datasets: [{
+                data: chartData.employee_counts,
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, usePointStyle: true }
+                }
+            }
+        }
+    });
+
+    // График продуктивности
+    const perfCtx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(perfCtx, {
+        type: 'line',
+        data: {
+            labels: chartData.departments,
+            datasets: [{
+                label: 'Продуктивность (%)',
+                data: chartData.performance_scores,
+                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 3,
+                pointRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
